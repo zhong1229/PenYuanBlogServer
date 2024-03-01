@@ -65,4 +65,8 @@ export class AuthController {
       throw new BadRequestException(error);
     }
   }
+  @Get('captcha')
+  async getCaptcha() {
+    return this.authService.generateCaptcha();
+  }
 }

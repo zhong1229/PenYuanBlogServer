@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-// import { CreateAuthDto } from './dto/create-auth.dto';
-// import { UpdateAuthDto } from './dto/update-auth.dto';
+
+import * as svgCaptcha from 'svg-captcha';
 
 import * as bcrypt from 'bcryptjs';
 
@@ -69,6 +69,14 @@ export class AuthService {
     try {
       await this.usersService.update(id, data);
       return { message: '修改成功' };
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
+  generateCaptcha() {
+    try {
+      const captcha = svgCaptcha.create();
+      return { data: captcha.data, text: captcha.text };
     } catch (error) {
       return Promise.reject(error);
     }
