@@ -3,6 +3,7 @@
 /node_modules
 /src/config/index.ts
 .env
+/.history
 
 # Logs
 logs
