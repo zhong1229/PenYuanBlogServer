@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  name          String
+  icon          String   @default("111")
+  password      String
+  introduction  String?  @db.LongText
+  birthDate     String?
+  constellation String?
+  hobby         String?
+  occupation    String?
+  character     String?
+  motto         String?
+  games1        String?
+  games2        String?
+  role          String   @default("general")
+  creationtime  DateTime @default(now())
+  updatetime    DateTime @updatedAt
+}
+
+model Article {
+  id           Int      @id @default(autoincrement())
+  title        String
+  cover        String
+  synopsis     String
+  tags         String
+  status       String   @default("0")
+  content      String   @db.LongText
+  pageview     Int      @default(0)
+  count        Int      @db.Int
+  creationtime DateTime @default(now())
+  updatetime   DateTime @updatedAt
+
+  cid     Int
+  cat     Category  @relation(fields: [cid], references: [id])
+  Comment Comment[]
+}
+
+model Category {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
+  synopsis     String
+  creationtime DateTime @default(now())
+  updatetime   DateTime @updatedAt
+
+  article Article[]
+}
+
+model Images {
+  id               Int      @id @default(autoincrement())
+  src              String
+  synopsis         String
+  creationtime     DateTime @default(now())
+  updatetime       DateTime @updatedAt
+  websiteSettingId Int?
+}
+
+model WebsiteSetting {
+  id       Int    @id @default(autoincrement())
+  blogname String
+  bloglogo String
+  describe String @db.LongText
+  slogan   String
+
+  github String
+  blibli String
+  email  String
+  douyin String
+
+  archival String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Carousel {
+  id       Int    @id @default(autoincrement())
+  url      String
+  describe String
+  link     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  id              Int     @id @default(autoincrement())
+  username        String
+  email           String
+  website         String
+  content         String  @db.LongText
+  postId          Int
+  replyname       String?
+  replynameEmail  String?
+  // 0 文章评论 1 留言
+  type            String
+  parentCommentId Int?
+
+  createdAt DateTime @default(now())
+
+  article Article @relation(fields: [postId], references: [id])
+
+  parentComment Comment?  @relation("ChildComments", fields: [parentCommentId], references: [id])
+  childComments Comment[] @relation("ChildComments")
+}
+
+model Visits {
+  id        Int      @id @default(autoincrement())
+  ipAddress String
+  userAgent String
+  timestamp DateTime @default(now())
+
+  pageviews PageViews[]
+}
+
+model PageViews {
+  id        Int    @id @default(autoincrement())
+  pageurl   String
+  pagetitle String
+
+  timestamp DateTime @default(now())
+
+  Visits   Visits? @relation(fields: [visitsId], references: [id])
+  visitsId Int?
+}
