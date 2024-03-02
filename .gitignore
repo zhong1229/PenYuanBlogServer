@@ -4,6 +4,7 @@
 /src/config/index.ts
 .env
 /.history
+/prisma/migrations
 
 # Logs
 logs

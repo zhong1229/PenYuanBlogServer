@@ -46,6 +46,8 @@ model Article {
   cid     Int
   cat     Category  @relation(fields: [cid], references: [id])
   Comment Comment[]
+
+  new_tags Tgas[]
 }
 
 model Category {
@@ -134,4 +136,12 @@ model PageViews {
 
   Visits   Visits? @relation(fields: [visitsId], references: [id])
   visitsId Int?
+}
+
+model Tgas {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  article Article[]
 }
