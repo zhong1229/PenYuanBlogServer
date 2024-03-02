@@ -5,6 +5,7 @@
 .env
 /.history
 /prisma/migrations
+/uploads/*
 
 # Logs
 logs

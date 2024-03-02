@@ -13,22 +13,36 @@ export class BlogService {
     try {
       const category = await this.categoryService.findById(createBlogDto.cid);
       if (!category) {
-        throw '分类不存在';
+        throw new Error('分类不存在');
       }
-      const params = createBlogDto.tags.split(',').map((item) => {
-        return {
-          where: { name: item },
-          create: { name: item },
-        };
-      });
+
+      const tagNames = createBlogDto.tags.split(',');
+      const tagOperations = tagNames.map((name) => ({
+        where: { name },
+        create: { name },
+      }));
+
+      const createdTags = await Promise.all(
+        tagOperations.map((tagOp) =>
+          db.tgas.upsert({
+            where: { name: tagOp.where.name },
+            update: {},
+            create: tagOp.create,
+          }),
+        ),
+      );
+
+      const tagIds = createdTags.map((tag) => ({ id: tag.id }));
+
       await db.article.create({
         data: {
           ...createBlogDto,
           new_tags: {
-            connectOrCreate: params,
+            connect: tagIds,
           },
         },
       });
+
       return { message: '文章创建成功' };
     } catch (error) {
       return Promise.reject(error);
@@ -50,7 +64,7 @@ export class BlogService {
       const query = {
         take: pagesize,
         skip: pagesize * (page - 1),
-        include: { cat: true },
+        include: { cat: true, new_tags: true },
         where: {
           ...(category && { cid: category.id }),
           ...(tag && { tags: { contains: tag } }),
@@ -103,7 +117,33 @@ export class BlogService {
   async update(id: number, updateBlogDto: UpdateBlogDto) {
     try {
       await this.findOne(id);
-      await db.article.update({ where: { id }, data: updateBlogDto });
+      const tagNames = updateBlogDto.tags.split(',');
+      const tagOperations = tagNames.map((name) => ({
+        where: { name },
+        create: { name },
+      }));
+
+      const createdTags = await Promise.all(
+        tagOperations.map((tagOp) =>
+          db.tgas.upsert({
+            where: { name: tagOp.where.name },
+            update: {},
+            create: tagOp.create,
+          }),
+        ),
+      );
+
+      const tagIds = createdTags.map((tag) => ({ id: tag.id }));
+
+      await db.article.update({
+        where: { id },
+        data: {
+          ...updateBlogDto,
+          new_tags: {
+            connect: tagIds,
+          },
+        },
+      });
       return { message: '文章修改成功' };
     } catch (error) {
       return Promise.reject(error);
@@ -116,19 +156,6 @@ export class BlogService {
       if (!post) {
         throw '文章不存在';
       }
-
-      const deleteTagsPromise = post.new_tags.map(async (tag: { id: any }) => {
-        const associatedArticlesCount = await db.tgas.count({
-          where: { id: tag.id, article: { some: { id: { not: id } } } },
-        });
-        if (associatedArticlesCount === 0) {
-          await db.tgas.delete({ where: { id: tag.id } });
-        }
-      });
-
-      // 等待所有标签删除操作完成
-      await Promise.all(deleteTagsPromise);
-
       await db.article.delete({ where: { id } });
       return { message: '文章删除成功' };
     } catch (error) {
@@ -145,27 +172,6 @@ export class BlogService {
         throw '文章不存在';
       }
       await db.article.deleteMany({ where: { id: { in: idList } } });
-
-      for (const articleId of idList) {
-        const articleTags = await db.article.findUnique({
-          where: { id: articleId },
-          include: { new_tags: true },
-        });
-
-        const deleteTagsPromise = articleTags?.new_tags.map(async (tag) => {
-          const associatedArticlesCount = await db.article.count({
-            where: {
-              new_tags: { some: { id: tag.id, NOT: { id: articleId } } },
-            },
-          });
-          if (associatedArticlesCount === 0) {
-            await prisma.tgas.delete({ where: { id: tag.id } });
-          }
-        });
-
-        // 等待所有标签删除操作完成
-        await Promise.all(deleteTagsPromise || []);
-      }
       return { message: '文章删除成功' };
     } catch (error) {
       return Promise.reject(error);
