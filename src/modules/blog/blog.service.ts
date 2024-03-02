@@ -180,7 +180,7 @@ export class BlogService {
 
   async getTags() {
     try {
-      return await db.tgas.findMany();
+      return await db.tgas.findMany({ where: { article: { some: {} } } });
     } catch (error) {
       return Promise.reject(error);
     }
