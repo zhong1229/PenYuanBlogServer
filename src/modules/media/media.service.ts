@@ -20,7 +20,10 @@ export class MediaService {
       ...(pagesize && { take: pagesize }),
     };
     try {
-      return await db.images.findMany(query);
+      return await db.images.findMany({
+        ...query,
+        orderBy: { creationtime: 'desc' },
+      });
     } catch (error) {
       return Promise.reject(error);
     }
