@@ -205,7 +205,7 @@ export class StatisticsService {
       ]);
 
     const currentDate = new Date();
-    const targetDate = new Date(2023, 6, 1);
+    const targetDate = new Date(2023, 12, 29);
     const timeDifference = targetDate.getTime() - currentDate.getTime();
     const daysDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
     return {
