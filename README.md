@@ -1,6 +1,6 @@
 # 鹏渊墨客 服务端介绍
 
-这个博客服务端基于 Nest 框架，使用 Prisma 作为 ORM（对象关系映射工具），MySQL 作为数据库存储引擎，并结合了 bcryptjs、class-validator 和七牛云 CDN 存储来实现一系列功能。
+鹏渊墨客服务端基于 Nest 框架，使用 Prisma 作为 ORM（对象关系映射工具），MySQL 作为数据库存储引擎，并结合了 bcryptjs、class-validator 和七牛云 CDN 存储来实现一系列功能。
 
 ## 功能列表
 1. **文章管理**：
