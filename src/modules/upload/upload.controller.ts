@@ -17,7 +17,9 @@ export class UploadController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<{ key: string }> {
     const key = `uploads/${Date.now()}_${file.originalname}`;
-    const localFilePath = file.path;
+    console.log(file);
+
+    const localFilePath = file.buffer;
 
     try {
       const uploadedKey = await this.uploadService.uploadFile(

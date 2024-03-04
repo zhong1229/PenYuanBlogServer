@@ -19,15 +19,15 @@ export class UploadService {
     this.config,
   );
 
-  async uploadFile(localFilePath: string, key: string): Promise<string> {
+  async uploadFile(fileContent: Buffer, key: string): Promise<string> {
     const uploadToken = this.generateUploadToken();
     const formUploader = new qiniu.form_up.FormUploader(this.config);
 
     return new Promise<string>((resolve, reject) => {
-      formUploader.putFile(
+      formUploader.put(
         uploadToken,
         key,
-        localFilePath,
+        fileContent,
         null,
         (respErr, respBody, respInfo) => {
           if (respErr) {
